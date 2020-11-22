@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import history from '../HistroryTracker/history'
 
 
 
@@ -12,15 +13,33 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
       color:"white",
-      textAlign:"center"
+      textAlign:"left",
+      marginLeft:"10px"
     },
     navbar :{
         backgroundColor:"DodgerBlue",
         height:"60px",
         marginBottom:"30px"
 
+    },
+    li:{
+      float:"left",
+      padding: "16px",
+      color:"white",
+      height:"60px",
+
+      '&:hover': {
+        "background-color": "#004486"
+      }
     }
   }));
+
+
+  function navigate(link) {
+    history.push({
+      pathname: link
+})
+  }
 
 
 
@@ -29,9 +48,18 @@ function Header() {
     
     return(
         
-        <nav className="navbar" className={classes.navbar}>
-  <h1 className={classes.title}>RGKV presents</h1>
-</nav>
+        <div className="navbar" className={classes.navbar}>
+  
+  <div style={{display:"flex",position:"absolute"}}>
+    <ul style={{listStyle:"none"}}>
+      <li className={classes.li} onClick={()=>navigate("/")}><a>Home</a></li>
+      <li className={classes.li} onClick={()=>navigate("/addItem")}><a >Add Item</a> </li>
+      <li className={classes.li} onClick={()=>navigate("/viewReport")}><a >View Report</a> </li>
+      <li className={classes.li} onClick={()=>navigate("/invoicegenerator")}><a >Invoice generator</a> </li>
+    </ul>
+  </div>
+  
+</div>
      
     )
 }

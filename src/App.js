@@ -12,6 +12,7 @@ import SummaryScreen from "./component/SummaryScreen"
 import ViewReport from "./component/ViewReport"
 import PdfGenerator from "./component/pdfGenerator"
 import PDFFile from "./component/PDFFile"
+import PDFregerate from "./component/PDFregerate"
 function App() {
   return (
     <Provider store={store}>
@@ -31,6 +32,7 @@ function App() {
    <Route exact path="/viewReport" component={ViewReport}></Route>
    <Route exact path="/invoicegenerator" component={PdfGenerator}></Route>
    <Route exact path="/viewgenerator" component={PDFFile}></Route>
+   <Route exact path="/pdfregenerate" component={PDFregerate}></Route>
 
 
    

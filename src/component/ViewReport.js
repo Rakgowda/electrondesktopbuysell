@@ -37,6 +37,13 @@ function ViewReport() {
             
         }, [])
 
+        function callTabelDATA(data)
+        {
+          fetchQuery(fetchItems(data));
+          setTabelName(data)
+
+        }
+
        
 
     return(
@@ -46,6 +53,11 @@ function ViewReport() {
         <br></br>
         <br></br>
         <br></br>
+        <div className="text-center" style={{display:"flex",justifyContent:"center"}}> 
+     <button className="btn btn-primary" type="button" onClick = {()=>callTabelDATA("ItemBuy")} style={{margin:"10px"}}>Buy</button>
+     <button className="btn btn-danger" type="button" style={{margin:"10px"}} onClick={()=>callTabelDATA("ItemSell")}>Sell</button>
+
+     </div>
         {fetchQueryState.fetchSuccessFully.length>0?(
           <ItemTabel tabelData={fetchQueryState.fetchSuccessFully} tabelName={tabelName}></ItemTabel>
         ):(

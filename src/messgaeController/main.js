@@ -44,6 +44,7 @@ const knex = require('knex')({
       table.string('CustomerName');
       table.string('Cddress');
       table.string('Cphone');
+      table.string('Invoice');
     
       
     });
@@ -110,11 +111,15 @@ ipcMain.on('itemAdding', (event, item) => {
 ipcMain.on('selectItem', (event, item) => {
 
   const tabelName = item;
-  knex(tabelName).select("*").then(r=>{
-    console.log(r)
-    event.reply("fetchsuccessfully",r)
+  createSellSchema().then(r=>{
+    knex(tabelName).select("*").then(r=>{
+      console.log(r)
+      event.reply("fetchsuccessfully",r)
+    }).catch(e=>{
+      console.log(e)
+    })
   }).catch(e=>{
-    console.log(e)
+    
   })
 });
 
@@ -137,7 +142,7 @@ ipcMain.on('sellItem', (event, item) => {
               knex('ItemBuy').update({quantity:quan}).where({itemName:item["itemName"]}).then(r=>{
                 console.log("user updated")
                 createSellSchema().then(r=>{
-                  knex('ItemSell').insert({date:d, itemName: item["itemName"],quantity:parseInt(item["quantity"]),price: parseFloat(item["price"]),CustomerName:item["CustomerName"],Cddress:item["Cddress"],Cphone:item["Cphone"]}).then(r=>{
+                  knex('ItemSell').insert({date:d, itemName: item["itemName"],quantity:parseInt(item["quantity"]),price: parseFloat(item["price"]),CustomerName:item["CustomerName"],Cddress:item["Cddress"],Cphone:item["Cphone"],Invoice:item["Invoice"]}).then(r=>{
                     console.log("ItemSell added")
                     event.reply("sellfetchsuccessfully","Successfully Sold the Item")
 

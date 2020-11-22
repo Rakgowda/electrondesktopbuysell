@@ -11,6 +11,7 @@ import {insertRequest} from "../redux/sellItem/sellinsertItemAction"
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import tick from "../images/tick.svg"
+import fetchItems from "../redux/fetchBuyResult/fetchItemAction"
 
 
 function Alert(props) {
@@ -64,17 +65,24 @@ function PDFFile(params) {
     const [confirmFlag,setConfirmFlag] = useState(false)
     const insertSellQueryState = useSelector(state=>state.InsertSellreducer)
     const insertSellQuery = useDispatch();
+    const fetchQueryState = useSelector(state=>state.fetchreducer)
+    const fetchQuery = useDispatch();
+    const [tabelName,setTabelName] = useState("ItemSell")
+    // alert(insertQueryState)
+    console.log(fetchQueryState)
+    
+
     useEffect(() => {
 
         debugger
-          
+        fetchQuery(fetchItems(tabelName));
         setInvoiceData(params.location.state)
         debugger
         insertSellQuery(insertRequest())
         
          
      }, [])
-
+console.log(fetchQueryState.fetchSuccessFully.length)
      
 
 
@@ -87,11 +95,14 @@ function PDFFile(params) {
      function pdfInvoiceGen()
      {
 
-
+        let i = parseInt(fetchQueryState.fetchSuccessFully.length + 1);
+        // alert(i)
+        let invoice = moment().format("DDMMYYYY").toString() + i;
         let query = params.location.state;
         query.CustomerName = query.customerName;
         query.Cddress = query.custormerAddress + ". PIN : "+query.pin;
         query.Cphone = query.phone;
+        query.Invoice = invoice;
         insertSellQuery(inserSellItem(query))
         debugger;
     
@@ -105,13 +116,13 @@ function PDFFile(params) {
         {
             document.querySelector("#taxinvoicebody").style.display = "none";
             document.querySelector("#successbody").hidden = false;
-            const doc = new jsPDF();
+            // const doc = new jsPDF();
  
-            // //   doc.cellAddPage();
-            // //   doc.getTextDimensions("hello")
+            // // //   doc.cellAddPage();
+            // // //   doc.getTextDimensions("hello")
             
-              autoTable(doc,{ html: '#table' });
-              doc.save("two-by-four.pdf");
+            //   autoTable(doc,{ html: '#table' });
+            //   doc.save("two-by-four.pdf");
         }
        
 
@@ -120,6 +131,32 @@ function PDFFile(params) {
       
      }
 
+     function reGeneratePDF(data) {  
+      let i = parseInt(fetchQueryState.fetchSuccessFully.length + 1);
+      // alert(i)
+      let invoice = moment().format("DDMMYYYY").toString() + i;
+      let query = params.location.state;
+      query.CustomerName = query.customerName;
+      query.Cddress = query.custormerAddress + ". PIN : "+query.pin;
+      query.Cphone = query.phone;
+      query.Invoice = invoice;
+      query.date = moment().format("DDMMYYYY").toString();
+      query.back = "invoicegenerator"
+      history.push({
+        pathname: '/pdfregenerate',
+  state: query
+  })
+    }
+     function formaterInvoiceNumber(n) {
+       debugger
+        let r ="";
+        for (let index = 0; index < 6- n.length; index++) {
+         r+="0";
+          
+        }
+        r+=n;
+        return r;
+     }
     
   
     
@@ -148,7 +185,7 @@ function PDFFile(params) {
         <div style={{display:"flex"}}>
 
             <div>
-    <p>Invoice Number : <b>{moment().format("DDMMYYYY").toString()}54545</b></p>
+    <p>Invoice Number : <b>{moment().format("DDMMYYYY").toString() + parseInt(fetchQueryState.fetchSuccessFully.length + 1 )}</b></p>
     <p>Invoice Date : <b> {moment().format("DD-MM-YYYY").toString()} </b></p>
                 
             </div>
@@ -199,7 +236,7 @@ function PDFFile(params) {
     {confirmFlag && (
      <div className="text-center" style={{display:"flex",justifyContent:"center"}}> 
      <button className="btn btn-primary" type="button" onClick = {toggleConfirmflag} style={{margin:"10px"}}>Back</button>
-     <button className="btn btn-primary" type="button" style={{margin:"10px"}} onClick={pdfInvoiceGen}>Submit</button>
+     <button className="btn btn-primary" type="button" style={{margin:"10px"}} onClick={()=>{pdfInvoiceGen()}}>Submit</button>
 
      </div>
      
@@ -218,7 +255,8 @@ function PDFFile(params) {
       <img src={tick} class="center" width="50px" height="50px"></img>
       </div>
       <p class="card-text text-center"> {insertSellQueryState.insertSuccessFully }</p>
-      
+      <button className="btn btn-primary" style={{margin:"auto",display:"block"}} type="button" onClick={()=>reGeneratePDF()}>Generate Invoice</button>
+
     </div>
   </div>
         </div>
