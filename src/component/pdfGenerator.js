@@ -11,7 +11,9 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
-
+import add from '../images/plus.svg'
+import del from '../images/trash.svg'
+import ItemInvoice from "./itemgenerateinvoice"
 const useStyles = makeStyles((theme) => ({
     root: {
         '& > *': {
@@ -47,6 +49,13 @@ const useStyles = makeStyles((theme) => ({
           alignItems:"baseline",
           width:"50%",
           margin:"auto"
+      },
+      divflex:{
+  margin: "30px"
+      },
+      fleximg:{
+        marginBottom:"auto",
+        marginTop:"auto"
       }
     
   }));
@@ -62,9 +71,9 @@ function PdfGenerator() {
     const [quantity,setQuantity] = useState()
     const [quantityFlag,setQuantityFlag] = useState(false)
     const [formValidate,setFormValidate] = useState(false);
-    const [itemName, setItemName] = useState('');
-    const [selecteditemName, setSelectedItemName] = useState({});
-
+    const [countItemlength,setCountitemlength]= useState([0]);
+    const [flagforAdd,setFlagforAdd] = useState(true) 
+    const [pin,SetPin]=useState()
 
 
 
@@ -83,51 +92,29 @@ function PdfGenerator() {
             
         }, [])
 
-function selectedItem(item){
-    for (let index = 0; index < fetchQueryState.fetchSuccessFully.length; index++) {
-              
-        let it = JSON.parse(fetchQueryState.fetchSuccessFully[index]);
         
 
-        if(it.itemName == item)
-        {
-            console.log(it)
-             setSelectedItemName(it);
-             
-             if(document.getElementById("quantity"))
-             {
-              document.getElementById("quantity").value = it.quantity;
-              document.getElementById("price").value = it.price;
-             }
-          
-             break;
-
-        }
-         
-     }
-}
+        
+        
   
  
   function onChangeInValidation(event)
   {
 
-    // if(event.target.id == "custpin" )
-    // {
-    //   debugger
-    //   var n = event.target.value.toString();
-    //   if(n.length > 5)
-    //   {
-    //       event.preventDefault()
-    //   }
-    // }
+   let quantity = document.querySelector("#itemaddinvoice").childNodes;
+
+   for (var i = 0; i < quantity.length-1; i++) {
     
-    if(document.querySelector("#customerName").value !="" && 
-        document.querySelector("#quantity").value !="" &&
-        document.querySelector("#price").value !="" &&
-        document.querySelector("#customeraddr").value !="" &&
+     if(quantity[i].style.display != "none" && quantity[i].querySelector("#quantity").value == "" || quantity[i].querySelector("#price").value == "" )
+     {
+      setFormValidate(false);
+      return ;
+     }
+   }
+
+    if( document.querySelector("#customeraddr").value !="" &&
         document.querySelector("#custpin").value !="" &&
-        document.querySelector("#custphone").value !="" &&
-        itemName!="")
+        document.querySelector("#custphone").value !="")
         {
             setFormValidate(true)
         }
@@ -142,42 +129,82 @@ function selectedItem(item){
       
 
   }
-  const handleChange = (event) => {
-    setItemName(event.target.value);
-    selectedItem(event.target.value);
-   
-  };
-  function onChangeQuantity(e){
-      console.log(e.target.value.toString().includes("."))
-      if(e.target.value == "")
-      {
-        setQuantity("")
-        onChangeInValidation()
-      }
-      else if(!e.target.value.toString().includes("."))
-      {
-        setQuantity(e.target.value)
-        onChangeInValidation()
-      }
-      
-  }
+
 
   function submitPDF() {
     let data ={}
+    data.item=[]
+    let ite = document.querySelector("#itemaddinvoice").childNodes;
+
+    for (var i = 0; i < ite.length-1; i++) {
+     
+      if(ite[i].style.display != "none")
+      {
+        data.item.push({quantity:ite[i].querySelector("#quantity").value,price:ite[i].querySelector("#price").value,item:ite[i].querySelector("#selectItem").innerText})
+      }
+    }
     data.customerName = document.querySelector("#customerName").value ;
-    data.quantity =document.querySelector("#quantity").value ;
-    data.price=document.querySelector("#price").value ;
+    
     data.custormerAddress =document.querySelector("#customeraddr").value ;
     data.pin =document.querySelector("#custpin").value ;
     data.phone =document.querySelector("#custphone").value ;
 
-    data.itemName = itemName;
-
+console.log(data)
     history.push({
       pathname: '/viewgenerator',
 state: data
 })
   }
+function countVisibleItem()
+{let visible = 0;
+  let chil = document.querySelector("#itemaddinvoice").childNodes;
+  for (let index = 0; index < document.querySelector("#itemaddinvoice").childElementCount; index++) {
+    if(chil[index].style.display != "none")
+    {
+        visible++;
+    }
+    
+  }
+  return visible;
+}
+  function increment() {
+
+    let l = countItemlength.length;
+    let r = Math.floor(Math.random() * 1000000)
+    setCountitemlength([...countItemlength,r]);
+    if(countVisibleItem() >= fetchQueryState.fetchSuccessFully.length )
+    {
+      setFlagforAdd(false)
+    }
+    else{
+      setFlagforAdd(true)
+    }
+
+    onChangeInValidation()
+  }
+
+  function deleteFormitem(i){
+    let l = countItemlength.length;
+    console.log(i)
+    debugger
+    if(l>1){
+      let c = countItemlength.filter((e)=>(e !== i));
+      
+      
+      document.querySelector("#formitem"+i).style.display="none";
+      
+      if(countVisibleItem() > fetchQueryState.fetchSuccessFully.length )
+      {
+        setFlagforAdd(false)
+      }
+      else{
+        setFlagforAdd(true)
+      }
+    }
+    onChangeInValidation()
+  }
+
+  
  
     return(
         
@@ -187,38 +214,10 @@ state: data
         <button className="btn btn-primary" type="button" onClick={() => history.push("/")} >Back</button>
         <h2 className="text-center">Generate Invoice</h2>
         <br></br>
-        <div className={classes.divCenter}>
-       
-        <FormControl className={classes.formControl}>
-        <InputLabel id="demo-simple-select-label">Select Item</InputLabel>
-        <Select
-          id="demo-simple-select"
-          value={itemName}
-          onChange={handleChange}
-        >
-             {
-                fetchQueryState.fetchSuccessFully.length >0 ?fetchQueryState.fetchSuccessFully.map((e,i)=>{
-                    e = JSON.parse(e);
-                    if(e.quantity>0)
-                    {
-                      return <MenuItem key={"item"+i} value={e.itemName}>{e.itemName}</MenuItem>
-
-                    }
-                    
-                }) :(
-                    <MenuItem value={""}>No Data</MenuItem>
-                )
-            }
-       
-        </Select>
-      </FormControl>
-        
-     {itemName?(
-         
-         
-          <div className="form-horizontal" style={{margin:"auto",marginTop:"20px"}}>
-          
-          <div className="form-group row">
+        <hr style={{borderRadius:"10px"}}></hr>
+        <h2>Billing to : </h2>
+        <div style={{display:"flex",justifyContent:"space-around"}}>
+        <div className="form-group row" >
           
           <div className="col-xs-4">
           
@@ -248,7 +247,7 @@ state: data
           
          
             <label htmlFor="comment">Customer Pin:</label>
-        <input type="number" pattern="[0-9]" className="form-control" max={5} placeholder="Enter Customer pincode"  id="custpin" onChange={onChangeInValidation}></input>
+        <input type="number"  className="form-control" min="5" placeholder="Enter Customer pincode"  id="custpin" onChange={onChangeInValidation}></input>
             
             </div>
             
@@ -264,38 +263,37 @@ state: data
             </div>
             
           </div>
-          
-          <div className="form-group row">
-          <div className="col-xs-4">
-            <label className="ex3" htmlFor="email">Quantity:</label>
-            
-              <input type="number"  className="form-control"
-              min="1"
-              step="1"
-              defaultValue={selecteditemName.quantity}
-               id={"quantity"} placeholder="Enter Quantity" name="quantity" onChange={onChangeQuantity}></input>
-            </div>
-            
           </div>
-          <div className="form-group row">
-          <div className="col-xs-4">
-            <label className="ex3" htmlFor="email">Price:</label>
-            
-              <input type="number" step=".01" className="form-control" id={"price"} placeholder="Enter Price" name="price" defaultValue={selecteditemName.price} onChange={onChangeInValidation}></input>
-            </div>
-            
-          </div>
+        <hr style={{borderRadius:"10px"}}></hr>
+
+        <h2>Add Item : </h2>
+        <div style={{display:"flex",justifyContent:"center",flexWrap:"wrap"}} id="itemaddinvoice">
+        {
+          countItemlength.map((e,i)=>(
+        <div className={classes.divflex} id={"formitem"+e}> 
+
+<img src={del} width="20px" height="20px" style={{margin:"auto",display:"flex"}} onClick={()=>deleteFormitem(e)}></img>
+
+<ItemInvoice itemlist={fetchQueryState.fetchSuccessFully} onChangeInValidation={()=>onChangeInValidation()}> </ItemInvoice>
+
+</div>
+
+          ))
+        }
+    
+       <div className={classes.fleximg}>
+         {
+         flagforAdd && fetchQueryState.fetchSuccessFully.length!=1 ?(<img src={add} style={{width:"50px",height:"50px"}} onClick={()=>increment()}></img>):""}
+       
+       </div>
         </div>
-           
-     ):""}
      
-    </div>
-    {itemName?(
         <div className="text-center"> 
         <button className="btn btn-primary" disabled={!formValidate} type="button" onClick={submitPDF}>Submit</button>
         </div>
-        
-    ):""}
+       
+
+     
 </div> 
 
           

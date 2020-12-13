@@ -3,7 +3,7 @@ const { ipcRenderer } = electron;
 
 var d =0;
 export default function fetchItemQuery(tabelName) {
-    
+    debugger
     return new Promise((resolve) => {
         ipcRenderer.once('fetchsuccessfully', (_, arg) => {
             // console.log(arg)
@@ -18,9 +18,16 @@ export default function fetchItemQuery(tabelName) {
             
         });
       
+       console.log(typeof(tabelName))
+       debugger
+   if(typeof(tabelName) == "object")
+   {
+    ipcRenderer.send('selectItemDate', tabelName);
+   }
+    else{
+        ipcRenderer.send('selectItem', tabelName);
+    }
        
-        
-       ipcRenderer.send('selectItem', tabelName);
         
     })
     

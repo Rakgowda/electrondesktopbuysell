@@ -6,6 +6,9 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import sendAsync from '../messgaeController/render'
 import history from '../HistroryTracker/history'
+import {useSelector,useDispatch} from "react-redux"
+import fetchItems from "../redux/fetchBuyResult/fetchItemAction"
+import moment from 'moment';
 
 
 function Alert(props) {
@@ -53,7 +56,17 @@ function AddItemForm() {
   };
 
   const [openSuccess, setOpenSuccess] = React.useState(false);
+  const [tabelName,setTabelName] = useState("ItemBuyDetail");
+  const fetchQueryState = useSelector(state=>state.fetchreducer)
+  const fetchQuery = useDispatch();
 
+  useEffect(() => {
+          
+    fetchQuery(fetchItems(tabelName));
+   
+    
+}, [])
+console.log(fetchQueryState)
   const handleClickSuccess = () => {
     setOpenSuccess(true);
   };
@@ -77,6 +90,14 @@ function AddItemForm() {
     function onsubmitAddItem() {
       let data = 0;
       let datainser ={}
+      let iteminfo ={}
+
+
+      datainser.CustomerName = document.querySelector("#customerName").value ;
+    
+    datainser.Cddress =document.querySelector("#customeraddr").value ;
+    // datainser.pin =document.querySelector("#custpin").value ;
+    datainser.Cphone =document.querySelector("#custphone").value ;
       
       for (let index = 0; index < form.length; index++) {
         
@@ -87,7 +108,7 @@ function AddItemForm() {
           let price = document.querySelector("#price"+form[index]).value;
           
           // sendAsync(itemName,quantity,price);
-          datainser[data]={"itemname":itemName,"quantity":quantity,"price":price}
+          iteminfo[data]={"itemname":itemName,"quantity":quantity,"price":price}
           data+=1;
 
 
@@ -97,6 +118,12 @@ function AddItemForm() {
        
       
       }
+      let i = parseInt(fetchQueryState.fetchSuccessFully.length + 1);
+        // alert(i)
+        let invoice = moment().format("DDMMYYYY").toString() + i;
+      datainser.Invoice = invoice;
+      datainser.item = iteminfo;
+      console.log(datainser)
       history.push({
         pathname: '/summary',
  state: datainser
@@ -143,7 +170,11 @@ function AddItemForm() {
 
           if(document.querySelector("#itemadd"+index).value !="" && 
           document.querySelector("#quantity"+index).value !="" &&
-          document.querySelector("#price"+index).value !="")
+          document.querySelector("#price"+index).value !="" &&
+          document.querySelector("#customeraddr").value !="" &&
+        document.querySelector("#custpin").value !="" &&
+        document.querySelector("#custphone").value !=""
+          )
           {
             
           }
@@ -215,6 +246,54 @@ function AddItemForm() {
           Item added
         </Alert>
       </Snackbar>
+      <div style={{display:"flex",justifyContent:"space-around"}}>
+        <div className="form-group row" >
+          
+          <div className="col-xs-4">
+          
+            <label className="ex3" htmlFor="email">Customer Name: 
+            
+            
+            </label>
+            
+              <input type="text" className="form-control" id={"customerName"} placeholder="Enter Customer Name"  name="customername" required onChange={()=>onChangeInValidation()}></input>
+            </div>
+            
+          </div>
+          <div className="form-group row">
+          
+          <div className="col-xs-4">
+          
+         
+            <label htmlFor="comment">Customer Address:</label>
+        <input className="form-control" type="text" placeholder="Enter Customer Address" id="customeraddr" onChange={()=>onChangeInValidation()}></input>
+            
+            </div>
+            
+          </div>
+          <div className="form-group row">
+          
+          <div className="col-xs-4">
+          
+         
+            <label htmlFor="comment">Customer Pin:</label>
+        <input type="number"  className="form-control" min="5" placeholder="Enter Customer pincode"  id="custpin" onChange={()=>onChangeInValidation()}></input>
+            
+            </div>
+            
+          </div>
+          <div className="form-group row">
+          
+          <div className="col-xs-4">
+          
+         
+            <label htmlFor="comment">Customer Phone:</label>
+        <input type="number" pattern="[0-9]" className="form-control" maxLength="10" placeholder="Enter Customer phone number"  id="custphone" onChange={()=>onChangeInValidation()}></input>
+            
+            </div>
+            
+          </div>
+          </div>
         <div className={classes.formDiv}>
 
           {

@@ -47,12 +47,16 @@ function PDFregerate(params) {
 
      function generatePDF(){
 
-        let total = invoiceData.quantity * invoiceData.price;
+        let total = 0;
+        for (var i = 0; i < invoiceData.item.length; i++) {
+          total+= invoiceData.item[i].quantity * invoiceData.item[i].price;
+        }
         const doc = new jsPDF({
             orientation: 'p',
  format: 'a4',
  putOnlyUsedFonts:true,
- floatPrecision: 16
+ floatPrecision: 16,
+ unit:"mm"
         });
         var elementHTML = document.querySelector("#taxinvoicebody");
         var elementHandler = {
@@ -62,14 +66,21 @@ function PDFregerate(params) {
           };
         // //   doc.cellAddPage();
         // //   doc.getTextDimensions("hello")
+
+       
+      //   doc.html(elementHTML,{
+      //     onrendered: {
+      //       scale: .5 // default is window.devicePixelRatio
+      //   },
+      //   callback: function () {
+      //     doc.save("two-by-four.pdf");
+      //   },
+      //   x:0,
+      //   y:0
+      // })
         
-        // doc.html(elementHTML, {
-        //     callback: function (doc) {
-        //       doc.save("two-by-four.pdf");
-        //     },
-        //     x: 1,
-        //     y: 1
-        //  })
+
+        
         doc.setFontSize(25)
         doc.setFont('courier','bold')
         doc.text(100, 20, 'Invoice')
@@ -96,28 +107,31 @@ doc.setLineWidth(.5)
 doc.line(0, 90, 210, 90)
        
         
+// doc.line(0, 115, 210, 115)
 
  autoTable(doc,{ html: '#table',
  startY:100});
+ let t = 0;
+ let extraheight = document.querySelector("#table").querySelectorAll("tr").length*6;
  doc.setFont('courier','bold')
  doc.setLineWidth(.5)
-doc.line(0, 120, 210, 120)
+doc.line(0, 130+extraheight, 210, 130+extraheight)
 doc.setFont('courier','normal')
-doc.text(100,130,"Grand Total : ")
+doc.text(100,150+extraheight,"Grand Total : ")
 doc.setFont('courier','bold')
-doc.text(150,130,""+total)
+doc.text(150,150+extraheight,""+total)
 doc.setFontSize(10)
-doc.text(160,200,"Authorize Signature")
+doc.text(160,180+extraheight,"Authorize Signature")
 
 doc.setLineWidth(.5)
-doc.line(0, 230, 210, 230)
+doc.line(0, 210+extraheight, 210, 210+extraheight)
 doc.setFont('courier','bold')
-doc.text(20,210,"Term and Instruction");
+doc.text(20,190+extraheight,"Term and Instruction");
 doc.setFont('courier','normal')
-doc.text(20,215,"Once customers make a purchase, they will not be able to return that item "+"\n"+
+doc.text(20,195+extraheight,"Once customers make a purchase, they will not be able to return that item "+"\n"+
 "for a replacement or refund. All sales final policies are typically applied "+"\n"+"to clearance sale items.");
 
-doc.save("two-by-four.pdf");
+doc.save(invoiceData.Invoice+".pdf");
           
 
                    
@@ -173,16 +187,21 @@ doc.save("two-by-four.pdf");
       </tr>
     </thead>
     <tbody>
-      <tr>
-    <td key={"invoice1"}>{invoiceData.itemName}</td>
-    <td key={"quantity1"}>{invoiceData.quantity}</td>
+    {
+        invoiceData.item != undefined ?invoiceData.item.map(e=>(
+          <tr>
+    <td key={"invoice1"}>{e.item}</td>
+    <td key={"quantity1"}>{e.quantity}</td>
 
-    <td key={"price1"}>{invoiceData.price}</td>
+    <td key={"price1"}>{e.price}</td>
     <td key={"gst1"} key={"invoice"}>9%</td>
-    <td key={"total1"}>{(invoiceData.price * invoiceData.quantity)}</td>
+    <td key={"total1"}>{(e.price * e.quantity)}</td>
 
 
       </tr>
+        )):""
+      }
+      
       
     </tbody>
   </table>

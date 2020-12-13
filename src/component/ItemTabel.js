@@ -2,6 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import history from '../HistroryTracker/history'
 import TextField from '@material-ui/core/TextField';
+import { getJSON } from 'jquery';
+import Modal from '@material-ui/core/Modal';
+
+function rand() {
+  return Math.round(Math.random() * 20) - 10;
+}
+
+function getModalStyle() {
+  const top = 50 + rand();
+  const left = 50 + rand();
+
+  return {
+    top: `${top}%`,
+    left: `${left}%`,
+    transform: `translate(-${top}%, -${left}%)`,
+  };
+}
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -17,6 +35,20 @@ const useStyles = makeStyles((theme) => ({
     iemSold: {
         color:"red",
         
+      },
+      iemList:{
+        color:"#ffc107",
+
+      }
+      ,
+      paper: {
+        position: 'absolute',
+        "min-width": 500,
+        backgroundColor: theme.palette.background.paper,
+        border: '2px solid #000',
+        boxShadow: theme.shadows[5],
+        padding: theme.spacing(2, 4, 3),
+        padding:"10px"
       },
   }));
   function searchdate(){
@@ -57,18 +89,77 @@ const useStyles = makeStyles((theme) => ({
 function ItemTable(params) {
     const classes = useStyles();
     let tabledata = params.tabelData;
-    let trclass = params.tabelName =="ItemBuy"?classes.iemBuy:classes.iemSold
+    let trclass = params.tabelName =="ItemBuy" ? classes.iemList :  params.tabelName =="ItemBuyDetail" ?classes.iemBuy:classes.iemSold
     // alert(tabledata.length)
 
     function reGeneratePDF(data) {  
+      data.item = JSON.parse(data.item);
+      console.log(data)
       history.push({
         pathname: '/pdfregenerate',
   state: data
   })
     }
 
+    const [modalStyle] = React.useState(getModalStyle);
+    const [open, setOpen] = React.useState(false);
+    const [dataitem, setDataitem] = React.useState({});
+    const body=()=>{
+return (
+  <div style={modalStyle} className={classes.paper}>
+    <h2 id="simple-modal-title">Item Detail</h2>
+    <table class="table table-striped text-center">
+<thead>
+<tr>
+  <th>Item</th>
+  <th>Price</th>
+  <th>Quantity</th>
+  <th>Total</th>
+</tr>
+</thead>
+<tbody>
+
+  {Object.keys(dataitem).map(e=>{
+    console.log(dataitem[e]["itemname"])
+    return (<tr>
+      <td>{dataitem[e]["itemname"] || dataitem[e]["item"]}</td>
+      <td>{dataitem[e]["quantity"]}</td>
+      <td>{dataitem[e]["price"]}</td>
+      <td>{dataitem[e]["price"]*dataitem[e]["quantity"]}</td>
+    
+    </tr>)
+  })}
+
+
+</tbody>
+</table>
+    
+  </div>
+)
+    }
+    const handleOpen = (e) => {
+     
+      console.log(JSON.parse(e))
+      setDataitem(JSON.parse(e))
+      setOpen(true);
+    };
+  
+    const handleClose = () => {
+      setOpen(false);
+    };
+
+
     return(
         <div className="container-fluid">
+
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+      >
+        {body()}
+      </Modal>
           <div style={{display:"flex",justifyContent:"center"}}>
         <div >
           <TextField id="myInput" label="Search" onChange={()=>myFunction()} placeholder="Search" title="Search anything" />
@@ -97,7 +188,7 @@ function ItemTable(params) {
 <br></br>
 <br></br>
 <table class="table table-striped text-center" id="myTable">
-  {}
+
     <thead>
       <tr>
         {params.tabelName=="ItemBuy"?(
@@ -108,16 +199,28 @@ function ItemTable(params) {
         <th>Total</th>
         <th>Last Updated</th>
         </React.Fragment>
+        ):params.tabelName=="ItemBuyDetail"?(
+        <React.Fragment>
+          <th>Number of item</th>
+
+          <th>Customer Name</th>
+        
+        <th>Invoice Number</th>
+        <th>Last Updated</th>
+        <th>View Detail</th>
+
+        </React.Fragment>
         ):(
           <React.Fragment>
-            <th>ItemName</th>
+          <th>Number of item</th>
+
           <th>Customer Name</th>
-        <th>Quantity</th>
-        <th>Price</th>
-        <th>Total</th>
+        
         <th>Invoice Number</th>
         <th>Last Updated</th>
         <th>Invoice Generate</th>
+        <th>View Detail</th>
+
 
         </React.Fragment>
         )}
@@ -127,10 +230,10 @@ function ItemTable(params) {
     <tbody className="text-center">
         {tabledata.map(e=>{
            let item = JSON.parse(e);
-           if(item.quantity>0)
-           {
+           
             if(params.tabelName=="ItemBuy")
             {
+              
              return(
                <tr className={trclass}>
                <td>{item["itemName"]}</td>
@@ -143,24 +246,45 @@ function ItemTable(params) {
              </tr>
               )
             }
+            else if(params.tabelName=="ItemBuyDetail")
+            {
+              return(
+                <tr className={trclass}>
+               
+                <td>{item["item"]?item["item"].split("}").length - 2:""}</td>
+                <td>{item["CustomerName"]}</td>
+               
+                <td>{item["Invoice"]}</td>
+  
+    
+                <td>{item["date"]}</td>
+  
+                <td><button className="btn btn-primary" type="button" onClick={()=>handleOpen(item.item)}>View Detail</button></td>
+    
+              </tr>
+               )
+    
+             
+            }
             else{
-             return(
+             
+              return(
                <tr className={trclass}>
-               <td>{item["itemName"]}</td>
+              
+               <td>{item["item"]?item["item"].split("}").length - 1:""}</td>
                <td>{item["CustomerName"]}</td>
-               <td>{item["quantity"]}</td>
-               <td>{item["price"]}</td>
-               <td>{item["price"]*item["quantity"]}</td>
+              
                <td>{item["Invoice"]}</td>
  
    
                <td>{item["date"]}</td>
                <td><button className="btn btn-primary" type="button" onClick={()=>reGeneratePDF(item)}>Regenerate Invoice</button></td>
+               <td><button className="btn btn-primary" type="button" onClick={()=>handleOpen(item.item)}>View Detail</button></td>
  
    
              </tr>
               )
-            }
+            
            }
           
         })}

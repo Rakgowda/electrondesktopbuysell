@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import { Switch, Route,Router} from 'react-router-dom'
 import { Provider } from 'react-redux'

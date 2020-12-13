@@ -82,7 +82,7 @@ function PDFFile(params) {
         
          
      }, [])
-console.log(fetchQueryState.fetchSuccessFully.length)
+
      
 
 
@@ -99,6 +99,7 @@ console.log(fetchQueryState.fetchSuccessFully.length)
         // alert(i)
         let invoice = moment().format("DDMMYYYY").toString() + i;
         let query = params.location.state;
+        query.item=params.location.state.item;
         query.CustomerName = query.customerName;
         query.Cddress = query.custormerAddress + ". PIN : "+query.pin;
         query.Cphone = query.phone;
@@ -214,16 +215,20 @@ console.log(fetchQueryState.fetchSuccessFully.length)
       </tr>
     </thead>
     <tbody>
-      <tr>
-    <td key={"invoice1"}>{invoiceData.itemName}</td>
-    <td key={"quantity1"}>{invoiceData.quantity}</td>
+      {
+        invoiceData.item != undefined ?invoiceData.item.map(e=>(
+          <tr>
+    <td key={"invoice1"}>{e.item}</td>
+    <td key={"quantity1"}>{e.quantity}</td>
 
-    <td key={"price1"}>{invoiceData.price}</td>
+    <td key={"price1"}>{e.price}</td>
     <td key={"gst1"} key={"invoice"}>9%</td>
-    <td key={"total1"}>{(invoiceData.price * invoiceData.quantity)}</td>
+    <td key={"total1"}>{(e.price * e.quantity)}</td>
 
 
       </tr>
+        )):""
+      }
       
     </tbody>
   </table>

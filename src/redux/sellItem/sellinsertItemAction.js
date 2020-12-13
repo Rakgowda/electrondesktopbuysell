@@ -36,7 +36,7 @@ const inserSellItem = (sql) => {
     debugger
     dispatch(insertRequest());
   //  alert(sql)
-
+console.log(sql)
    
   sellItem(sql).then( r=>{
      console.log(r);

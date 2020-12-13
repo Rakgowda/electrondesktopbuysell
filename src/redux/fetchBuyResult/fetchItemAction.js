@@ -32,14 +32,23 @@ const fetchItems = (tabelName) => {
     dispatch(fetchRequest());
   //  alert(sql)
 
-   
   fetchItemQuery(tabelName).then( r=>{
      console.log(r);
      console.log(r[0]);
      let rr = [];
+     debugger
      Object.values(r).forEach(element => {
        console.log(element)
-       rr.push(JSON.stringify(element))
+       if(element.quantity > 0)
+       {
+        rr.push(JSON.stringify(element))
+
+       }
+       else if(tabelName == "ItemSell" || tabelName.data == "ItemSell" || tabelName == "ItemBuyDetail" || tabelName.data == "ItemBuyDetail" )
+       {
+        rr.push(JSON.stringify(element))
+
+       }
      });
 
      dispatch(fetchSucess(rr));

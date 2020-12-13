@@ -23,7 +23,7 @@ const knex = require('knex')({
       table.string('itemName');
       table.integer('quantity');
       table.decimal('price');
-      table.string('date')
+      table.date('date')
       
     });
   }
@@ -37,10 +37,8 @@ const knex = require('knex')({
     // to do this. We create it here for simplicity.
     await knex.schema.createTable('ItemSell', table => {
       table.increments('id').primary();
-      table.string('itemName');
-      table.integer('quantity');
-      table.decimal('price');
-      table.string('date');
+      table.string('item');
+      table.date('date');
       table.string('CustomerName');
       table.string('Cddress');
       table.string('Cphone');
@@ -50,34 +48,67 @@ const knex = require('knex')({
     });
   }
 
+  async function createBuySchema() {
+    if (await knex.schema.hasTable('ItemBuyDetail')) {
+      return;
+    }
+  
+    // Create database schema. You should use knex migration files
+    // to do this. We create it here for simplicity.
+    await knex.schema.createTable('ItemBuyDetail', table => {
+      table.increments('id').primary();
+      table.string('item');
+      table.date('date');
+      table.string('CustomerName');
+      table.string('Cddress');
+      table.string('Cphone');
+      table.string('Invoice');
+    
+      
+    });
+  }
+
+
+
 ipcMain.on('itemAdding', (event, item) => {
-    const sql = item;
-    var d = moment().format("DD-MM-YYYY").toString();
+    const sql = item.item;
+    var d = moment().format("YYYY-MM-DD").toString();
 
+    createBuySchema().then(r=>{
+      let ss = JSON.stringify(sql)
+      knex('ItemBuyDetail').insert({date:d, item: ss,CustomerName:item["CustomerName"],Cddress:item["Cddress"],Cphone:item["Cphone"],Invoice:item["Invoice"]}).then(r=>{
     createSchema().then(r=>{
-        for (var key of Object.keys(sql)) {
-            
-
-            knex('ItemBuy').select("quantity").where({itemName:sql[key]["itemname"]}).then(r=>{
-              if(r.length==0)
-              {
-                knex('ItemBuy').insert({date:d, itemName: sql[key]["itemname"],quantity:parseInt(sql[key]["quantity"]),price: parseFloat(sql[key]["price"])}).then(r=>{
-                  console.log("user added")
-              }).catch(e=>console.log(e))
-              }
-              else{
-                var quan = parseInt(sql[key]["quantity"])+parseInt(r[0]["quantity"]);
-                knex('ItemBuy').update({date:d,quantity:quan,price: parseFloat(sql[key]["price"])}).where({itemName:sql[key]["itemname"]}).then(r=>{
-                  console.log("user updated")
-              }).catch(e=>console.log(e))
-              }
+      for (let key in sql) {
+          
+        let name = sql[key]["itemname"]
+         console.log(name)
+          knex('ItemBuy').select("quantity").where({itemName:name}).then(r=>{
+            if(r.length==0)
+            {
+          
+              knex('ItemBuy').insert({date:d, itemName: name,quantity:parseInt(sql[key]["quantity"]),price: parseFloat(sql[key]["price"])}).then(r=>{
+                console.log("user added")
             }).catch(e=>console.log(e))
-          }
+            }
+            else{
 
-          event.reply("insetDetail","item is added successfully")
-        
-        
+              var quan = parseInt(sql[key]["quantity"])+parseInt(r[0]["quantity"]);
+              knex('ItemBuy').update({date:d,quantity:quan,price: parseFloat(sql[key]["price"])}).where({itemName:name}).then(r=>{
+                console.log("user updated")
+            }).catch(e=>console.log(e))
+            }
+          }).catch(e=>console.log(e))
+        }
+
+        event.reply("insetDetail","item is added successfully")
+      
+      
+  }).catch(e=>console.log(e))
     }).catch(e=>console.log(e))
+    }).catch(e=>{
+
+    })
+
 
     // let sqlinsert = "insert into ItemBuy values ('"+sql[0]+"',"+sql[1]+","+sql[2]+")";
         
@@ -122,48 +153,105 @@ ipcMain.on('selectItem', (event, item) => {
     
   })
 });
+ipcMain.on('selectItemDate', (event, item) => {
+
+  const tabelName = item.data;
+  createSellSchema().then(r=>{
+    knex(tabelName).select("*").where('date','>=',item.from).where('date','<=',item.to).then(r=>{
+      console.log(r)
+      event.reply("fetchsuccessfully",r)
+    }).catch(e=>{
+      console.log(e)
+    })
+  }).catch(e=>{
+    
+  })
+});
 
 
 ipcMain.on('sellItem', (event, item) => {
+  console.log("*****************************************************************************************")
   const sql = item;
-  var d = moment().format("DD-MM-YYYY").toString();
-  createSchema().then(r=>{
-   
-        knex('ItemBuy').select("quantity").where({itemName:item["itemName"]}).then(r=>{
+  console.log(sql.item)
+  var d = moment().format("YYYY-MM-DD").toString();
+  for (var i = 0; i < sql.item.length; i++) {
+    var j = 0;
+    let s = sql.item[i];
+    console.log(s)
+    createSchema().then(r=>{
+      knex('ItemBuy').select("quantity").where({itemName:s["item"]}).then(r=>{
+        if(r.length>0)
+        {
+          var quan = parseInt(r[0]["quantity"]) - parseInt(s["quantity"]);
+          if(quan<0)
+          {
+            console.log(quan)
+           
+            event.reply("sellerrorInsert",s["item"] + " quantity is more than the expected")
+
+          }
+          else{
+            j=j+1;
+            console.log("j = "+j)
+            if(j==sql.item.length)
+            {
+                   console.log("inside")
+    for (var i = 0; i < sql.item.length; i++) {
+      let s = sql.item[i];
+      var rrr = 1;
+      console.log("insied val")
+      createSchema().then(r=>{
+        knex('ItemBuy').select("quantity").where({itemName:s["item"]}).then(r=>{
           if(r.length>0)
           {
-            var quan = parseInt(r[0]["quantity"]) - parseInt(item["quantity"]);
+            var quan = parseInt(r[0]["quantity"]) - parseInt(s["quantity"]);
             if(quan<0)
             {
-              event.reply("sellerrorInsert","Quantity is more than the expected")
-
-            }
-            else{
-              knex('ItemBuy').update({quantity:quan}).where({itemName:item["itemName"]}).then(r=>{
+              return event.reply("sellerrorInsert",s["item"] + " quantity is more than the expected")
+  
+            }else{
+              knex('ItemBuy').update({quantity:quan}).where({itemName:s["item"]}).then(r=>{
                 console.log("user updated")
-                createSellSchema().then(r=>{
-                  knex('ItemSell').insert({date:d, itemName: item["itemName"],quantity:parseInt(item["quantity"]),price: parseFloat(item["price"]),CustomerName:item["CustomerName"],Cddress:item["Cddress"],Cphone:item["Cphone"],Invoice:item["Invoice"]}).then(r=>{
-                    console.log("ItemSell added")
-                    event.reply("sellfetchsuccessfully","Successfully Sold the Item")
+                if(rrr == sql.item.length)
+                {
+                  createSellSchema().then(r=>{
+                    let ss = JSON.stringify(sql.item)
+                    knex('ItemSell').insert({date:d, item: ss,CustomerName:item["CustomerName"],Cddress:item["Cddress"],Cphone:item["Cphone"],Invoice:item["Invoice"]}).then(r=>{
+                      console.log("ItemSell added")
+                      return event.reply("sellfetchsuccessfully","Successfully Sold the Item")
+                
+                  }).catch(e=>{
+                    event.reply("sellerrorInsert","Error occurred while updating value in Sell Item")
+                  })
+                  }).catch(e=>{
+                    event.reply("sellerrorInsert","Error occurred while creating Buy Item")
+                  })
+                }
+                rrr++;
 
-                }).catch(e=>{
-                  event.reply("sellerrorInsert","Error occurred while updating value in Sell Item")
-                })
-                }).catch(e=>{
-                  event.reply("sellerrorInsert","Error occurred while creating Buy Item")
-                })
+              
             }).catch(e=>{
-              event.reply("sellerrorInsert","Error occurred while updating value in Buy Item")
+             
+              return event.reply("sellerrorInsert","Error occurred while updating value in Buy Item")
             })
             }
-            
           }
-          
-        }).catch(e=>console.log(e))
-      
+        })
+        
+    
+    }).catch(e=>console.log(e))
+      }
+ 
+
+            }
+            
+
+          }
+        }
+      })
+    })
+
+  }
 
   
-    
-    
-}).catch(e=>console.log(e))
-});
+  });
