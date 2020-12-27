@@ -35,7 +35,7 @@ function createAddItemWindow () {
     }
   })
 
-  addItem.loadURL(isDev? "http://localhost:3000/addItem": `file://${path.join(__dirname, "../build/index.html")}`);
+  addItem.loadURL(isDev? "http://localhost:3000/fromadress": `file://${path.join(__dirname, "../build/index.html")}`);
 
   if(process.env.NODE_ENV === 'production')
   {
@@ -60,7 +60,7 @@ const menuTemplate=[
     label:'File',
     submenu:[
       {
-        label:'New Item',
+        label:'add From address',
         click(){
           createAddItemWindow()
         }
