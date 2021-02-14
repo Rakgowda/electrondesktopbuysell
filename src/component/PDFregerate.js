@@ -5,6 +5,7 @@ import Header from "./Header"
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable'
 import {useSelector,useDispatch} from "react-redux"
+import fetchAddreducer from "../redux/fromaddress/fetchFromaddressAction"
 
 
 const useStyles = makeStyles((theme) => ({
@@ -40,16 +41,27 @@ function PDFregerate(params) {
   
     const classes = useStyles();
     const [invoiceData,setInvoiceData] = useState(params.location.state)
-   
+    const fetchAddState = useSelector(state=>state.fetchAddreducer)
+    const fetchAddQuery = useDispatch();
+    useEffect(() => {
+          
+        fetchAddQuery(fetchAddreducer("select",{}));
+        
+       
+        
+    }, [])
 
-   console.log(invoiceData)
+   console.log(fetchAddState)
     
 
      function generatePDF(){
 
+      let fromadd = fetchAddState.fetchSuccessFully[0].CustomerName +","+fetchAddState.fetchSuccessFully[0].Cddress+". PIN : "+
+      fetchAddState.fetchSuccessFully[0].Cpin +". Phone : "+fetchAddState.fetchSuccessFully[0].Cphone
         let total = 0;
         for (var i = 0; i < invoiceData.item.length; i++) {
-          total+= invoiceData.item[i].quantity * invoiceData.item[i].price;
+          let price =  invoiceData.item[i].quantity * invoiceData.item[i].price;
+          total+= price +(price*(invoiceData.item[i].gst/100));
         }
         const doc = new jsPDF({
             orientation: 'p',
@@ -98,11 +110,15 @@ doc.text(80, 40, invoiceData.date)
 doc.setFont('courier','bold')
 doc.text(20, 55, 'From :')
 doc.setFont('courier','normal')
-doc.text(20, 65, 'Rakshith, Halaguru,Malavalli,Pin:571421')
+doc.setFontSize(10)
+doc.text(20, 65, fromadd)
+doc.setFontSize(15)
 doc.setFont('courier','bold')
 doc.text(20, 75, 'To :')
 doc.setFont('courier','normal')
+doc.setFontSize(10)
 doc.text(20, 85, invoiceData.CustomerName +" ," + invoiceData.Cddress +". Phone : "+invoiceData.Cphone)
+doc.setFontSize(15)
 doc.setLineWidth(.5)
 doc.line(0, 90, 210, 90)
        
@@ -140,7 +156,14 @@ doc.save(invoiceData.Invoice+".pdf");
      }
 
     let back = invoiceData.back?"/"+invoiceData.back:"/viewReport";
-    
+    function total(){
+      let t = 0;
+      for (var i = 0; i < invoiceData.item.length; i++) {
+        let price = invoiceData.item[i].quantity * invoiceData.item[i].price;
+        t+= price+(price*(invoiceData.item[i].gst/100));
+      }
+       return t;
+    }
     return(
         <React.Fragment>
             <div className="container-fluid">
@@ -194,8 +217,8 @@ doc.save(invoiceData.Invoice+".pdf");
     <td key={"quantity1"}>{e.quantity}</td>
 
     <td key={"price1"}>{e.price}</td>
-    <td key={"gst1"} key={"invoice"}>9%</td>
-    <td key={"total1"}>{(e.price * e.quantity)}</td>
+    <td key={"gst1"} key={"invoice"}>{e.gst}%</td>
+    <td key={"total1"}>{(e.price * e.quantity)+((e.price * e.quantity)*(e.gst/100))}</td>
 
 
       </tr>
@@ -206,7 +229,11 @@ doc.save(invoiceData.Invoice+".pdf");
     </tbody>
   </table>
 
-
+  <h2 style={{textAlign:"right",marginRight:"50px"}}>Total : <span>
+  {
+        invoiceData.item != undefined ?total():""}
+  
+    </span></h2>
     <div className="text-center"> 
         <button className="btn btn-primary" type="button" style={{margin:"10px"}} onClick = {generatePDF}>Generate PDF</button>
         </div>

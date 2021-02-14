@@ -75,16 +75,6 @@ function PdfGenerator() {
     const [flagforAdd,setFlagforAdd] = useState(true) 
     const [pin,SetPin]=useState()
 
-
-
-
-    // alert(insertQueryState)
-    console.log(fetchQueryState)
-
-    
-    
-
-    
         useEffect(() => {
           
             fetchQuery(fetchItems(tabelName));
@@ -105,7 +95,7 @@ function PdfGenerator() {
 
    for (var i = 0; i < quantity.length-1; i++) {
     
-     if(quantity[i].style.display != "none" && quantity[i].querySelector("#quantity").value == "" || quantity[i].querySelector("#price").value == "" )
+     if(quantity[i].style.display != "none" && quantity[i].querySelector("#quantity").value == "" || quantity[i].querySelector("#price").value == "" || quantity[i].querySelector("#gst").value == "" )
      {
       setFormValidate(false);
       return ;
@@ -136,11 +126,12 @@ function PdfGenerator() {
     data.item=[]
     let ite = document.querySelector("#itemaddinvoice").childNodes;
 
+
     for (var i = 0; i < ite.length-1; i++) {
      
       if(ite[i].style.display != "none")
       {
-        data.item.push({quantity:ite[i].querySelector("#quantity").value,price:ite[i].querySelector("#price").value,item:ite[i].querySelector("#selectItem").innerText})
+        data.item.push({quantity:ite[i].querySelector("#quantity").value,price:ite[i].querySelector("#price").value,gst:ite[i].querySelector("#gst").value,item:ite[i].querySelector("#selectItem").innerText})
       }
     }
     data.customerName = document.querySelector("#customerName").value ;
@@ -148,6 +139,7 @@ function PdfGenerator() {
     data.custormerAddress =document.querySelector("#customeraddr").value ;
     data.pin =document.querySelector("#custpin").value ;
     data.phone =document.querySelector("#custphone").value ;
+
 
 console.log(data)
     history.push({

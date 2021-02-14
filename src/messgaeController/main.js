@@ -23,7 +23,9 @@ const knex = require('knex')({
       table.string('itemName');
       table.integer('quantity');
       table.decimal('price');
-      table.date('date')
+      table.date('date');
+      table.string('gst');
+      
       
     });
   }
@@ -63,6 +65,27 @@ const knex = require('knex')({
       table.string('Cddress');
       table.string('Cphone');
       table.string('Invoice');
+ 
+    
+      
+    });
+  }
+
+  async function createfromaddress() {
+    if (await knex.schema.hasTable('Fromaddress')) {
+      return;
+    }
+  
+    // Create database schema. You should use knex migration files
+    // to do this. We create it here for simplicity.
+    await knex.schema.createTable('Fromaddress', table => {
+      table.increments('id').primary();
+      table.date('date');
+      table.string('CustomerName');
+      table.string('Cddress');
+      table.string('Cpin');
+      table.string('Cphone');
+     
     
       
     });
@@ -86,14 +109,14 @@ ipcMain.on('itemAdding', (event, item) => {
             if(r.length==0)
             {
           
-              knex('ItemBuy').insert({date:d, itemName: name,quantity:parseInt(sql[key]["quantity"]),price: parseFloat(sql[key]["price"])}).then(r=>{
+              knex('ItemBuy').insert({date:d, itemName: name,gst:parseInt(sql[key]["gst"]),quantity:parseInt(sql[key]["quantity"]),price: parseFloat(sql[key]["price"])}).then(r=>{
                 console.log("user added")
             }).catch(e=>console.log(e))
             }
             else{
 
               var quan = parseInt(sql[key]["quantity"])+parseInt(r[0]["quantity"]);
-              knex('ItemBuy').update({date:d,quantity:quan,price: parseFloat(sql[key]["price"])}).where({itemName:name}).then(r=>{
+              knex('ItemBuy').update({date:d,quantity:quan,gst:parseInt(sql[key]["gst"]),price: parseFloat(sql[key]["price"])}).where({itemName:name}).then(r=>{
                 console.log("user updated")
             }).catch(e=>console.log(e))
             }
@@ -153,6 +176,53 @@ ipcMain.on('selectItem', (event, item) => {
     
   })
 });
+ipcMain.on('fromaddress', (event, item) => {
+  var d = moment().format("YYYY-MM-DD").toString();
+  createfromaddress().then(r=>{
+    knex("Fromaddress").select("*").then(r=>{
+      console.log("number of select "+r)
+      if(r.length>=1)
+      {
+        console.log("if")
+        knex("Fromaddress").update({"date":d,"CustomerName":item.CustomerName,"Cddress":item.CustomerAdd,"Cpin":item.CPin,"Cphone":item.CPhone}).where({id:1}).then(r=>{
+          event.reply("fromadressfetchsuccessfully",r)
+        }).catch(e=>{
+          event.reply("fromadresserrorInsert",e)
+        })
+      }
+      else{
+        console.log("else")
+        knex("Fromaddress").insert({"date":d,"CustomerName":item.CustomerName,"Cddress":item.CustomerAdd,"Cpin":item.CPin,"Cphone":item.CPhone}).then(r=>{
+          event.reply("fromadressfetchsuccessfully",r)
+        }).catch(e=>{
+          event.reply("fromadresserrorInsert",e)
+        })
+      }
+      
+    }).catch(e=>{
+      event.reply("fromadresserrorInsert",e)
+    })
+  }).catch(e=>{
+    event.reply("fromadresserrorInsert",e)
+  })
+});
+
+ipcMain.on('selectfromaddress', (event, item) => {
+ 
+  createfromaddress().then(r=>{
+    knex("Fromaddress").select("*").then(r=>{
+      console.log(r)
+      event.reply("fromadressfetchsuccessfully",r)
+    }).catch(e=>{
+      console.log(e)
+    })
+  }).catch(e=>{
+    
+  }).catch(e=>{
+    event.reply("fromadresserrorInsert",e)
+  })
+});
+
 ipcMain.on('selectItemDate', (event, item) => {
 
   const tabelName = item.data;

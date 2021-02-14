@@ -172,6 +172,14 @@ function ItemInvoice(params) {
             </div>
             
           </div>
+          <div className="form-group row">
+          <div className="col-xs-4">
+            <label className="ex3" htmlFor="email">GST:</label>
+            
+              <input type="number" step=".01" className="form-control" id="gst"  placeholder="Enter Gst" name="gst" defaultValue={selecteditemName.gst} onChange={params.onChangeInValidation} ></input>
+            </div>
+            
+          </div>
         </div>
           
      

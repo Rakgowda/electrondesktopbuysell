@@ -1,5 +1,5 @@
 {
-  "name": "reportgenerator",
+  "name": "SmallBusinessManagement",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -14,7 +14,6 @@
     "cross-env": "^7.0.2",
     "date-fns": "^2.16.1",
     "electron": "^10.1.5",
-    "electron-builder": "^22.9.1",
     "electron-is-dev": "^1.2.0",
     "jquery": "^3.5.1",
     "jspdf": "^2.1.1",
@@ -37,14 +36,38 @@
     "yarn": "^1.22.10"
   },
   "scripts": {
+    "postinstall": "install-app-deps",
+    "dist": "electron-builder",
+    "pack": "electron-builder --dir",
     "react-start": "react-scripts start",
     "react-build": "react-scripts build",
     "react-test": "react-scripts test",
     "react-eject": "react-scripts eject",
     "electron-build": "electron-builder",
     "release": "yarn react-build && electron-builder --publish=always",
-    "build": "yarn react-build && yarn electron-build",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\""
+  },
+  "build": {
+    "appId": "com.smallbusinessmanagement",
+    "category": "your.app.category.type",
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": "NSIS",
+      "icon": "build/icon.ico"
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -66,9 +89,9 @@
   },
   "description": "Small business management is used to manage daily sell and buy.",
   "author": "rakshithgowda KV",
-  "build": {
-    "appId": "<com.your_app>"
-  },
   "main": "public/electron.js",
-  "homepage": "./"
+  "homepage": "./",
+  "devDependencies": {
+    "electron-builder": "^22.9.1"
+  }
 }

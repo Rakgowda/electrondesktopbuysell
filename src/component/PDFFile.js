@@ -68,6 +68,7 @@ function PDFFile(params) {
     const fetchQueryState = useSelector(state=>state.fetchreducer)
     const fetchQuery = useDispatch();
     const [tabelName,setTabelName] = useState("ItemSell")
+    const [totalValue,setTotalValue] = useState(0)
     // alert(insertQueryState)
     console.log(fetchQueryState)
     
@@ -83,8 +84,16 @@ function PDFFile(params) {
          
      }, [])
 
-     
+     console.log(invoiceData.item)
 
+    function total(){
+      let t = 0;
+      for (var i = 0; i < invoiceData.item.length; i++) {
+        let price = invoiceData.item[i].quantity * invoiceData.item[i].price;
+        t+= (price)+(price*(invoiceData.item[i].gst/100));
+      }
+       return t;
+    }
 
 
      function toggleConfirmflag()
@@ -159,7 +168,7 @@ function PDFFile(params) {
         return r;
      }
     
-  
+     
     
     return(
         <React.Fragment>
@@ -215,15 +224,16 @@ function PDFFile(params) {
       </tr>
     </thead>
     <tbody>
+   
       {
-        invoiceData.item != undefined ?invoiceData.item.map(e=>(
+        invoiceData.item != undefined ?invoiceData.item.map((e,i)=>(
           <tr>
     <td key={"invoice1"}>{e.item}</td>
     <td key={"quantity1"}>{e.quantity}</td>
 
     <td key={"price1"}>{e.price}</td>
-    <td key={"gst1"} key={"invoice"}>9%</td>
-    <td key={"total1"}>{(e.price * e.quantity)}</td>
+    <td key={"gst1"} key={"invoice"}>{e.gst+"%"}</td>
+    <td key={"total1"}>{(e.price * e.quantity)+((e.price * e.quantity)*(e.gst/100))}</td>
 
 
       </tr>
@@ -232,6 +242,12 @@ function PDFFile(params) {
       
     </tbody>
   </table>
+
+  <h2 style={{textAlign:"right",marginRight:"50px"}}>Total : <span>
+  {
+        invoiceData.item != undefined ?total():""}
+  
+    </span></h2>
 
   {!confirmFlag && (
     <div className="text-center"> 

@@ -106,9 +106,10 @@ console.log(fetchQueryState)
           let itemName = document.querySelector("#itemadd"+form[index]).value;
           let quantity = document.querySelector("#quantity"+form[index]).value;
           let price = document.querySelector("#price"+form[index]).value;
+          let gst = document.querySelector("#gst"+form[index]).value;
           
           // sendAsync(itemName,quantity,price);
-          iteminfo[data]={"itemname":itemName,"quantity":quantity,"price":price}
+          iteminfo[data]={"itemname":itemName,"quantity":quantity,"price":price,gst}
           data+=1;
 
 
@@ -173,7 +174,8 @@ console.log(fetchQueryState)
           document.querySelector("#price"+index).value !="" &&
           document.querySelector("#customeraddr").value !="" &&
         document.querySelector("#custpin").value !="" &&
-        document.querySelector("#custphone").value !=""
+        document.querySelector("#custphone").value !="" &&
+        document.querySelector("#gst"+index).value !=""
           )
           {
             
@@ -330,6 +332,14 @@ console.log(fetchQueryState)
       <label className="ex3" for="email">Price:</label>
       
         <input type="number" step=".01" className="form-control" id={"price"+i} placeholder="Enter Price" name="price" onChange={()=>onChangeInValidation()}></input>
+      </div>
+      
+    </div>
+    <div className="form-group row">
+    <div className="col-xs-4">
+      <label className="ex3" for="gst">GST:</label>
+      
+        <input type="number" step=".01" className="form-control" id={"gst"+i} placeholder="Enter GST" name="gst" onChange={()=>onChangeInValidation()}></input>
       </div>
       
     </div>

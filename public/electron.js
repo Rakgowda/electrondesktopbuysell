@@ -9,6 +9,7 @@ function createWindow () {
    win = new BrowserWindow({
     width: 800,
     height: 600,
+    icon:"/build/icon.ico",
     webPreferences: {
       nodeIntegration: true
     }
